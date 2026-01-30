@@ -17,10 +17,24 @@
           @click="doMenuClick"
         />
       </a-col>
+      <!-- 用户信息展示栏 -->
       <a-col flex="120px">
         <div class="user-login-status">
           <div v-if="loginUserStore.loginUser.id">
-            {{ loginUserStore.loginUser.userName ?? '无名' }}
+            <a-dropdown>
+              <a-space>
+                <a-avatar :src="loginUserStore.loginUser.userAvatar" />
+                {{ loginUserStore.loginUser.userName ?? '无名' }}
+              </a-space>
+              <template #overlay>
+                <a-menu>
+                  <a-menu-item @click="doLogout">
+                    <LogoutOutlined />
+                    退出登录
+                  </a-menu-item>
+                </a-menu>
+              </template>
+            </a-dropdown>
           </div>
           <div v-else>
             <a-button type="primary" href="/user/login">登录</a-button>
@@ -30,15 +44,18 @@
     </a-row>
   </div>
 </template>
+
 <script lang="ts" setup>
-import { h, ref } from 'vue'
-import { HomeOutlined } from '@ant-design/icons-vue'
+import { h, ref, computed } from 'vue'
+import { HomeOutlined, LogoutOutlined } from '@ant-design/icons-vue'
 import type { MenuProps } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 import { useLoginUserStore } from '../stores/useLoginUserStore'
+import { userLogoutUsingPost } from '@/api/userController'
+import { message } from 'ant-design-vue'
 
 const loginUserStore = useLoginUserStore()
-const items = ref<MenuProps['items']>([
+const originItems = [
   {
     key: '/',
     icon: () => h(HomeOutlined),
@@ -46,21 +63,53 @@ const items = ref<MenuProps['items']>([
     title: '主页',
   },
   {
-    key: '/about',
-    label: '关于',
-    title: '关于',
+    key: '/admin/userManage',
+    label: '用户管理',
+    title: '用户管理',
   },
   {
     key: 'others',
     label: h('a', { href: 'https://www.codefather.cn', target: '_blank' }, '编程导航'),
     title: '编程导航',
   },
-])
+]
+//根据权限过滤菜单项
+const filterMenus = (menus: MenuProps['items'] = []) => {
+  return menus.filter((menu) => {
+    if (menu?.key?.startsWith('/admin')) {
+      const loginUser = loginUserStore.loginUser
+      if (!loginUser || loginUser.userRole !== 'admin') {
+        return false
+      }
+    }
+    return true
+  })
+}
+
+const items = computed(() => {
+  return filterMenus(originItems)
+})
 
 const router = useRouter()
 //路由跳转事件
 const doMenuClick = ({ key }: { key: string }) => {
   router.push({ path: key })
+}
+
+//退出登录事件
+const doLogout = async () => {
+  const res = await userLogoutUsingPost()
+  if (res.data.code === 0) {
+    loginUserStore.setLoginUser({
+      userName: '未登录',
+    })
+    message.success('退出登录成功')
+    router.push({
+      path: '/user/login',
+    })
+  } else {
+    message.error('退出登录失败' + res.data.message)
+  }
 }
 
 //当前需要高亮的菜单项
