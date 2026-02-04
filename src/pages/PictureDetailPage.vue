@@ -63,13 +63,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { getPictureVoByIdUsingGet, deletePictureUsingPost } from '@/api/pictureController'
+import {
+  getPictureVoByIdUsingGet,
+  deletePictureUsingPost,
+  doPictureReviewUsingPost,
+} from '@/api/pictureController'
 import { message } from 'ant-design-vue'
 import { formatSize, downloadImage } from '@/utils'
 import { DeleteOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { useRouter } from 'vue-router'
+import { PIC_REVIEW_STATUS_ENUM } from '@/constants/picture'
 
 interface Props {
   id: string | number
