@@ -5,8 +5,14 @@
         v-model:value="fileUrl"
         style="width: calc(100% - 120px)"
         placeholder="请输入图片地址"
+        :disabled="props.disabled"
       />
-      <a-button type="primary" style="width: 120px" :loading="loading" @click="handleUpload"
+      <a-button
+        type="primary"
+        style="width: 120px"
+        :loading="loading"
+        @click="handleUpload"
+        :disabled="props.disabled"
         >提交</a-button
       >
     </a-input-group>
@@ -24,6 +30,8 @@ import { uploadPictureByUrlUsingPost } from '@/api/pictureController'
 interface Props {
   picture?: API.PictureVO
   onSuccess?: (newPicture: API.PictureVO) => void
+  spaceId?: number
+  disabled?: boolean
 }
 
 const props = defineProps<Props>()

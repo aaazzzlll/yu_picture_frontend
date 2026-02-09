@@ -7,6 +7,10 @@ import AddPicturePage from '@/pages/AddPicturePage.vue'
 import PictureManagePage from '@/pages/admin/PictureManagePage.vue'
 import PictureDetailPage from '@/pages/PictureDetailPage.vue'
 import AddPictureBatchPage from '@/pages/AddPictureBatchPage.vue'
+import SpaceManagePage from '@/pages/admin/SpaceManagePage.vue'
+import AddSpacePage from '@/pages/AddSpacePage.vue'
+import MySpacePage from '@/pages/MySpacePage.vue'
+import SpaceDetailPage from '@/pages/SpaceDetailPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,10 +41,16 @@ const router = createRouter({
       component: PictureManagePage,
     },
     {
+      path: '/admin/spaceManage',
+      name: '空间管理',
+      component: SpaceManagePage,
+    },
+    {
       path: '/add_picture',
       name: '创建图片',
       component: AddPicturePage,
     },
+
     {
       path: '/add_picture/batch',
       name: '批量创建图片',
@@ -50,6 +60,24 @@ const router = createRouter({
       path: '/picture/:id',
       name: '图片详情',
       component: PictureDetailPage,
+      props: true,
+    },
+    {
+      path: '/add_space',
+      name: '创建空间',
+      component: AddSpacePage,
+    },
+    {
+      path: '/my_space',
+      name: '我的空间',
+      component: MySpacePage,
+    },
+    {
+      //由于id是动态变化的，所以id需要加:
+      path: '/space/:id',
+      name: '空间详情',
+      component: SpaceDetailPage,
+      //将路由路径中的参数直接转换为组件的Props属性传给组件
       props: true,
     },
     {

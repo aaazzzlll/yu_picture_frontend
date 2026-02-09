@@ -63,23 +63,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import {
-  getPictureVoByIdUsingGet,
-  deletePictureUsingPost,
-  doPictureReviewUsingPost,
-} from '@/api/pictureController'
+import { getPictureVoByIdUsingGet, deletePictureUsingPost } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
 import { formatSize, downloadImage } from '@/utils'
 import { DeleteOutlined, DownloadOutlined, EditOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { useRouter } from 'vue-router'
-import { PIC_REVIEW_STATUS_ENUM } from '@/constants/picture'
 
 interface Props {
   id: string | number
 }
-
+//此处的props是从路由传递过来的图片id
 const props = defineProps<Props>()
 const picture = ref<API.PictureVO>({})
 
@@ -116,8 +111,17 @@ onMounted(() => {
 })
 
 const router = useRouter()
+
+//编辑图片
 const doEdit = () => {
-  router.push('/add_picture?id=' + picture.value.id)
+  //跳转时一定要携带spaceId
+  router.push({
+    path: `/add_picture`,
+    query: {
+      id: picture.value.id,
+      spaceId: picture.value.spaceId,
+    },
+  })
 }
 
 //删除图片
