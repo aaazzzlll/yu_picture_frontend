@@ -26,3 +26,11 @@ export const PIC_REVIEW_STATUS_OPTIONS = Object.keys(PIC_REVIEW_STATUS_MAP).map(
     value: key,
   }
 })
+
+/**
+ * 图片格式下拉表单选项
+ */
+export const PIC_FORMAT_OPTIONS = [
+  { label: 'JPEG', value: 'JPEG' },
+  { label: 'PNG', value: 'PNG' },
+]

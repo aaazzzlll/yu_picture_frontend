@@ -38,7 +38,6 @@ import { reactive, ref } from 'vue'
 import { message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
 
-const picture = ref<API.PictureVO>()
 const formData = reactive<API.PictureUploadByBatchRequest>({ count: 10 })
 //提交任务状态
 const loading = ref(false)
