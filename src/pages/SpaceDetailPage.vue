@@ -7,8 +7,10 @@
         <a-button type="primary" :href="`/add_picture?spaceId=${props.id}`" target="_blank"
           >+ 创建图片</a-button
         >
+        <a-button :icon="h(EditOutlined)" @click="doBatchEdit">批量编辑</a-button>
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
+          placement="bottomRight"
         >
           <a-progress
             type="circle"
@@ -32,17 +34,25 @@
       :total="total"
       @change="onPageChange"
     />
+    <BatchEditPictureModal
+      ref="batchEditPictureModalRef"
+      :pictureList="dataList"
+      :spaceId="props.id"
+      :onSuccess="onBatchEditPictureSuccess"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, h } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { listPictureVoByPageUsingPost } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
 import { formatSize } from '@/utils'
 import PictureList from '@/components/PictureList.vue'
 import PictureSearchForm from '@/components/PictureSearchForm.vue'
+import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
+import { EditOutlined } from '@ant-design/icons-vue'
 
 interface Props {
   id: string | number
@@ -118,6 +128,18 @@ const onSearch = (newSearchParams: API.PictureQueryRequest) => {
     current: 1, //重置页码
   }
   fetchData()
+}
+
+//--------批量编辑图片回调函数-----------
+const batchEditPictureModalRef = ref()
+const onBatchEditPictureSuccess = () => {
+  fetchData()
+}
+
+const doBatchEdit = () => {
+  if (batchEditPictureModalRef.value) {
+    batchEditPictureModalRef.value.openModal()
+  }
 }
 </script>
 
