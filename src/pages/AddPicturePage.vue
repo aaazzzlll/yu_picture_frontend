@@ -48,15 +48,26 @@
 
     <!-- 图片编辑区域 -->
     <div v-if="picture" class="edit-bar">
-      <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+      <a-space>
+        <a-button :icon="h(EditOutlined)" @click="doEditPicture">编辑图片</a-button>
+        <a-button type="primary" :icon="h(FullscreenOutlined)" @click="doImagePainting"
+          >AI 扩图</a-button
+        >
+      </a-space>
+      <ImageCropper
+        ref="imageCropperRef"
+        :imageUrl="picture?.url"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onPropSuccess"
+      />
+      <ImageOutPainting
+        ref="imageOutPaintingRef"
+        :picture="picture"
+        :spaceId="spaceId"
+        :onSuccess="onImageOutPaintingSuccess"
+      />
     </div>
-    <ImageCropper
-      ref="imageCropperRef"
-      :imageUrl="picture?.url"
-      :picture="picture"
-      :spaceId="spaceId"
-      :onSuccess="onPropSuccess"
-    />
 
     <!-- 图片信息表单 -->
     <a-form v-if="picture" layout="vertical" :model="pictureForm" @finish="handleSubmit">
@@ -112,7 +123,8 @@ import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { formatSize } from '@/utils'
 import ImageCropper from '@/components/ImageCropper.vue'
-import { EditOutlined } from '@ant-design/icons-vue'
+import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
+import ImageOutPainting from '@/components/ImageOutPainting.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -229,7 +241,7 @@ onMounted(() => {
   getOldPicture()
 })
 
-//图片编辑器引用
+//-------------图片编辑器引用-------------
 const imageCropperRef = ref()
 
 //编辑图片
@@ -238,6 +250,18 @@ const doEditPicture = () => {
 }
 
 const onPropSuccess = (newPicture: API.PictureVO) => {
+  picture.value = newPicture
+}
+
+//-------------AI扩图引用-------------
+const imageOutPaintingRef = ref()
+
+//打开AI扩图弹窗
+const doImagePainting = () => {
+  imageOutPaintingRef.value?.openModal()
+}
+//AI扩图成功回调
+const onImageOutPaintingSuccess = (newPicture: API.PictureVO) => {
   picture.value = newPicture
 }
 </script>
