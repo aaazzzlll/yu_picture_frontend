@@ -11,6 +11,7 @@ import SpaceManagePage from '@/pages/admin/SpaceManagePage.vue'
 import AddSpacePage from '@/pages/AddSpacePage.vue'
 import MySpacePage from '@/pages/MySpacePage.vue'
 import SpaceDetailPage from '@/pages/SpaceDetailPage.vue'
+import SpaceAnalyzePage from '@/pages/SpaceAnalyzePage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -62,6 +63,7 @@ const router = createRouter({
       component: PictureDetailPage,
       props: true,
     },
+
     {
       path: '/add_space',
       name: '创建空间',
@@ -79,6 +81,11 @@ const router = createRouter({
       component: SpaceDetailPage,
       //将路由路径中的参数直接转换为组件的Props属性传给组件
       props: true,
+    },
+    {
+      path: '/space_analyze',
+      name: '空间分析',
+      component: SpaceAnalyzePage,
     },
     {
       path: '/about',

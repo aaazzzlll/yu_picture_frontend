@@ -16,7 +16,7 @@
     >
       <template #description>
         <a-progress
-          :percent="((space.totalSize / space.maxSize) * 100).toFixed(1)"
+          :percent="((space.totalSize / space.maxSize) * 100).toFixed(2)"
           :status="isSpaceFull ? 'exception' : 'active'"
         />
         <div v-if="isSpaceFull" style="color: red; margin-top: 8px">
