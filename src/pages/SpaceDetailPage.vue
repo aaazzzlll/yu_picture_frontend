@@ -2,12 +2,28 @@
   <div id="spaceDetailPage">
     <!-- 空间信息 -->
     <a-flex justify="space-between">
-      <h2>{{ space.spaceName }} (私有空间)</h2>
+      <h2>{{ space.spaceName }} ({{ SPACE_TYPE_MAP[space.spaceType] }})</h2>
+
       <a-space size="middle">
-        <a-button type="primary" :href="`/add_picture?spaceId=${props.id}`" target="_blank"
+        <a-button
+          v-if="canUploadPicture"
+          type="primary"
+          :href="`/add_picture?spaceId=${props.id}`"
+          target="_blank"
           >+ 创建图片</a-button
         >
         <a-button
+          v-if="canManageSpaceUser && space.spaceType === SPACE_TYPE_ENUM.TEAM"
+          type="primary"
+          ghost
+          :icon="h(TeamOutlined)"
+          :href="`/spaceUserManage/${id}`"
+          target="_blank"
+        >
+          成员管理
+        </a-button>
+        <a-button
+          v-if="canManageSpaceUser"
           type="primary"
           ghost
           :icon="h(BarChartOutlined)"
@@ -15,7 +31,9 @@
           target="_blank"
           >空间分析</a-button
         >
-        <a-button :icon="h(EditOutlined)" @click="doBatchEdit">批量编辑</a-button>
+        <a-button v-if="canEditPicture" :icon="h(EditOutlined)" @click="doBatchEdit"
+          >批量编辑</a-button
+        >
         <a-tooltip
           :title="`占用空间 ${formatSize(space.totalSize)} / ${formatSize(space.maxSize)}`"
           placement="bottomRight"
@@ -28,12 +46,23 @@
         </a-tooltip>
       </a-space>
     </a-flex>
-    <div style="margin-bottom: 16px"></div>
+    <div style="margin-bottom: 10px">
+      <a-tag color="blue" v-if="space.spaceType === SPACE_TYPE_ENUM.TEAM">
+        团队角色：{{ spaceRoleName }}
+      </a-tag>
+    </div>
     <!-- 搜索表单 -->
     <PictureSearchForm :onSearch="onSearch" />
     <div style="margin-bottom: 16px"></div>
     <!-- 图片列表 -->
-    <PictureList :dataList="dataList" :loading="loading" :showOp="true" :onReload="fetchData" />
+    <PictureList
+      :canEdit="canEditPicture"
+      :canDelete="canDeletePicture"
+      :dataList="dataList"
+      :loading="loading"
+      :showOp="true"
+      :onReload="fetchData"
+    />
     <!-- 分页 -->
     <a-pagination
       style="text-align: right"
@@ -52,7 +81,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, h } from 'vue'
+import { ref, onMounted, h, watch, computed } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { listPictureVoByPageUsingPost } from '@/api/pictureController'
 import { message } from 'ant-design-vue'
@@ -60,7 +89,8 @@ import { formatSize } from '@/utils'
 import PictureList from '@/components/PictureList.vue'
 import PictureSearchForm from '@/components/PictureSearchForm.vue'
 import BatchEditPictureModal from '@/components/BatchEditPictureModal.vue'
-import { BarChartOutlined, EditOutlined } from '@ant-design/icons-vue'
+import { BarChartOutlined, EditOutlined, TeamOutlined } from '@ant-design/icons-vue'
+import { SPACE_PERMISSION_ENUM, SPACE_TYPE_MAP, SPACE_TYPE_ENUM } from '@/constants/space'
 
 interface Props {
   id: string | number
@@ -68,6 +98,31 @@ interface Props {
 //此处的路由是从路由传递过来的空间id
 const props = defineProps<Props>()
 const space = ref<API.SpaceVO>({})
+const spaceRoleName = computed(() => {
+  const permissions = space.value.permissionList ?? []
+  if (permissions.includes('spaceUser:manage')) {
+    return '管理员'
+  }
+  if (permissions.includes('picture:edit') || permissions.includes('picture:upload')) {
+    return '编辑者'
+  }
+  if (permissions.includes('picture:view')) {
+    return '浏览者'
+  }
+  return '成员'
+})
+// 通用权限检查函数
+function createPermissionChecker(permission: string) {
+  return computed(() => {
+    return (space.value.permissionList ?? []).includes(permission)
+  })
+}
+
+// 定义权限检查
+const canManageSpaceUser = createPermissionChecker(SPACE_PERMISSION_ENUM.SPACE_USER_MANAGE)
+const canUploadPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_UPLOAD)
+const canEditPicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_EDIT)
+const canDeletePicture = createPermissionChecker(SPACE_PERMISSION_ENUM.PICTURE_DELETE)
 
 //----------------------获取空间详情--------------------
 const fetchSpaceDetail = async () => {
@@ -113,7 +168,7 @@ const fetchData = async () => {
     dataList.value = res.data.data.records ?? []
     total.value = res.data.data.total ?? 0
   } else {
-    message.error('获取数据失败' + res.data.message)
+    message.error('获取数据失败 ' + res.data.message)
   }
   loading.value = false
 }
@@ -149,6 +204,20 @@ const doBatchEdit = () => {
     batchEditPictureModalRef.value.openModal()
   }
 }
+
+// 空间 id 改变时，必须重新获取数据
+/*
+**props 是一个 reactive 对象,
+监听 reactive 对象的某一个属性需要传入一个 getter 函数（即 () => val），
+不能直接传值
+*/
+watch(
+  () => props.id,
+  () => {
+    fetchSpaceDetail()
+    fetchData()
+  },
+)
 </script>
 
 <style scoped>

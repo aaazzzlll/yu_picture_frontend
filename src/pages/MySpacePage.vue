@@ -6,6 +6,7 @@
 
 <script setup lang="ts">
 import { listSpaceVoByPageUsingPost } from '@/api/spaceController'
+import { SPACE_TYPE_ENUM } from '@/constants/space'
 import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { message } from 'ant-design-vue'
 import { onMounted } from 'vue'
@@ -29,11 +30,12 @@ const checkUserSpace = async () => {
     userId: loginUser.id,
     current: 1,
     pageSize: 1,
+    spaceType: SPACE_TYPE_ENUM.PRIVATE,
   })
   if (res.data.code === 0) {
     if (res.data.data?.records?.length > 0) {
       const space = res.data.data?.records[0]
-      router.replace(`/space/${space.id}`)
+      router.replace(`/space/${space?.id}`)
     } else {
       router.replace('/add_space')
       message.warn('请先创建个人空间')
