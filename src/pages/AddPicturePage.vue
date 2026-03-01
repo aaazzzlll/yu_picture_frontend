@@ -59,6 +59,7 @@
         :imageUrl="picture?.url"
         :picture="picture"
         :spaceId="spaceId"
+        :space="space"
         :onSuccess="onPropSuccess"
       />
       <ImageOutPainting
@@ -116,7 +117,7 @@ import {
   listPictureTagCategoryUsingGet,
 } from '@/api/pictureController'
 import PictureUpload from '@/components/PictureUpload.vue'
-import { reactive, ref, onMounted, computed, h } from 'vue'
+import { reactive, ref, onMounted, computed, h, watchEffect } from 'vue'
 import { message } from 'ant-design-vue'
 import { useRouter, useRoute } from 'vue-router'
 import UrlPictureUpload from '@/components/UrlPictureUpload.vue'
@@ -216,11 +217,10 @@ const getTagCategoryOptions = async () => {
 
 onMounted(() => {
   getTagCategoryOptions()
-  if (spaceId.value) {
-    fetchSpaceDetail()
-  }
 })
-
+watchEffect(() => {
+  fetchSpaceDetail()
+})
 //获取老数据
 const getOldPicture = async () => {
   const id = route.query?.id
